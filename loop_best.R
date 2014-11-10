@@ -134,16 +134,21 @@ summary(all2011_2013$total_inc6)
 
 ## think of a better plot here
 
-#dropping name and keeping rank
+#dropping name and keeping rank in given year
 all2011_2013$name2 <- str_sub(all2011_2013$name, 1, 5)
-all2011_2013$name3 <- sub('![1-15000]', '',all2011_2013$name2)
+all2011_2013$name3 <- sub('\\. ..$', '',all2011_2013$name2)
+all2011_2013$name4 <- sub('\\. .$', '',all2011_2013$name3)
+all2011_2013$name5 <- sub('\\. $', '',all2011_2013$name4)
+all2011_2013$name6 <- sub('\\.$', '',all2011_2013$name5)
+all2011_2013$name7 <- as.numeric(all2011_2013$name6, length=5)
+summary(all2011_2013$name7)
 
-
-clean <- all2011_2013[, (colnames(all2011_2013) %in% c("name", "total_inc6", "taxes_paid6", "ratio3", "year"))]
+clean <- all2011_2013[, (colnames(all2011_2013) %in% c("name7", "total_inc6", "taxes_paid6", "ratio3", "year"))]
 str(clean)
 clean <- plyr::rename(x = clean,
                              replace = c("total_inc6" = "total_inc",
                                          "taxes_paid6" = "taxes_paid",
+                                         "name7" = "rank",
                                          "ratio3" = "ratio"
                              ))
 
