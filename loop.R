@@ -9,7 +9,7 @@ library(XML)
 
 tables = list()
 
-for (i in 1:29){
+for (i in 1:3){
 
 # URL with the medals table
 URL_temp <- paste0('http://www.taloussanomat.fi/verotiedot/2010/suurituloisimmat/?n=', i)
@@ -19,10 +19,14 @@ table <- URL_temp %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
 
 # Identify correct table
 names(table) # the table does not have an ID
+
+names <- c
+
 # select first table with taxData
 tables[[i]] <- table[[1]]
 ##rearrange the list somehow???
 
+##end loop
 }
 
 # Convert to a data frame
