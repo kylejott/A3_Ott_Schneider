@@ -7,25 +7,26 @@ library(httr)
 library(dplyr)
 library(XML)
 
-tables = list()
+tables = data.frame()
 
-for (i in 1:3){
+for (i in 1:30){
 
 # URL with the medals table
-URL_temp <- paste0('http://www.taloussanomat.fi/verotiedot/2010/suurituloisimmat/?n=', i)
-
+URL_temp <- paste0('http://www.taloussanomat.fi/verotiedot/2013/suurituloisimmat/?n=', i)
+if (i==1) { tables <- URL_temp %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+            tables <- tables[[1]] }
+else if (i!=1){
 #### Gather content and parse all tables ####
-table <- URL_temp %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+table_temp <- URL_temp %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
 
 # Identify correct table
-names(table) # the table does not have an ID
-
-names <- c
+# names(table) # the table does not have an ID
 
 # select first table with taxData
-tables[[i]] <- table[[1]]
-##rearrange the list somehow???
+tables_df_temp <- table_temp[[1]]
 
+tables <- rbind(tables, tables_df_temp)
+}
 ##end loop
 }
 
