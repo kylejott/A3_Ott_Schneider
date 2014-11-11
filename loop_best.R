@@ -7,6 +7,7 @@ library(httr)
 library(dplyr)
 library(XML)
 library(ggplot2)
+library(stringr)
 
 
 ## 2013 data
@@ -135,64 +136,62 @@ for (i in 1:25){
 tables2009$year <- 2009
 
 
+all <- rbind(tables2009, tables2010, tables2011, tables2012, tables2013)
 
 
-all2011_2013 <- rbind(tables2011, tables2012, tables2013)
-
-
-class(all2011_2013$year)
+class(all$year)
 #changing the titles to english
-all2011_2013 <- plyr::rename(x = all2011_2013,
+all <- plyr::rename(x = all,
                            replace = c("Nimi" = "name",
                                        "Tulot yht" = "total_inc",
                                        "Verot" = "taxes_paid",
                                        "Suhde" = "ratio"
                                        ))
-str(all2011_2013)
+str(all)
 
 #cleaning ratio
-all2011_2013$ratio2 <- str_sub(all2011_2013$ratio, 1, 2)
-summary(all2011_2013$ratio2)
-all2011_2013$ratio3 <- as.numeric(all2011_2013$ratio2, length=2)
-summary(all2011_2013$ratio3)
+all$ratio2 <- str_sub(all$ratio, 1, 2)
+summary(all$ratio2)
+all$ratio3 <- as.numeric(all$ratio2, length=2)
+summary(all$ratio3)
 
-qplot(ratio3, data=all2011_2013, geom="histogram")
+qplot(ratio3, data=all, geom="histogram")
 
 #cleaning taxes_paid
-sub(' â¬ $', '',all2011_2013$taxes_paid)
-all2011_2013$taxes_paid2 <- sub(' â¬$', '',all2011_2013$taxes_paid)
-all2011_2013$taxes_paid3 <- str_trim(all2011_2013$taxes_paid2)
-all2011_2013$taxes_paid4 <-sub(' ', '',all2011_2013$taxes_paid3)
-all2011_2013$taxes_paid5 <-sub(' ', '',all2011_2013$taxes_paid4)
-all2011_2013$taxes_paid6 <- as.numeric(all2011_2013$taxes_paid5, length=9)
-summary(all2011_2013$taxes_paid6)
+sub(' â¬ $', '',all$taxes_paid)
+all$taxes_paid2 <- sub(' â¬$', '',all$taxes_paid)
+all$taxes_paid3 <- str_trim(all$taxes_paid2)
+all$taxes_paid4 <-sub(' ', '',all$taxes_paid3)
+all$taxes_paid5 <-sub(' ', '',all$taxes_paid4)
+all$taxes_paid6 <- as.numeric(all$taxes_paid5, length=9)
+summary(all$taxes_paid6)
 
 ## think of a better plot here
-qplot(ratio3, taxes_paid6, data=all2011_2013)
+#qplot(ratio3, taxes_paid6, data=all)
 
-boxplot(all2011_2013$taxes_paid6)
+#boxplot(all$taxes_paid6)
 
 
 #cleaning total_inc
-all2011_2013$total_inc2 <- sub(' â¬$', '',all2011_2013$total_inc)
-all2011_2013$total_inc3 <- str_trim(all2011_2013$total_inc2)
-all2011_2013$total_inc4 <-sub(' ', '',all2011_2013$total_inc3)
-all2011_2013$total_inc5 <-sub(' ', '',all2011_2013$total_inc4)
-all2011_2013$total_inc6 <- as.numeric(all2011_2013$total_inc5, length=13)
-summary(all2011_2013$total_inc6)
+all$total_inc2 <- sub(' â¬$', '',all$total_inc)
+all$total_inc3 <- str_trim(all$total_inc2)
+all$total_inc4 <-sub(' ', '',all$total_inc3)
+all$total_inc5 <-sub(' ', '',all$total_inc4)
+all$total_inc6 <- as.numeric(all$total_inc5, length=13)
+summary(all$total_inc6)
 
 ## think of a better plot here
 
 #dropping name and keeping rank in given year
-all2011_2013$name2 <- str_sub(all2011_2013$name, 1, 5)
-all2011_2013$name3 <- sub('\\. ..$', '',all2011_2013$name2)
-all2011_2013$name4 <- sub('\\. .$', '',all2011_2013$name3)
-all2011_2013$name5 <- sub('\\. $', '',all2011_2013$name4)
-all2011_2013$name6 <- sub('\\.$', '',all2011_2013$name5)
-all2011_2013$name7 <- as.numeric(all2011_2013$name6, length=5)
-summary(all2011_2013$name7)
+all$name2 <- str_sub(all$name, 1, 5)
+all$name3 <- sub('\\. ..$', '',all$name2)
+all$name4 <- sub('\\. .$', '',all$name3)
+all$name5 <- sub('\\. $', '',all$name4)
+all$name6 <- sub('\\.$', '',all$name5)
+all$name7 <- as.numeric(all$name6, length=5)
+summary(all$name7)
 
-clean <- all2011_2013[, (colnames(all2011_2013) %in% c("name7", "total_inc6", "taxes_paid6", "ratio3", "year"))]
+clean <- all[, (colnames(all) %in% c("name7", "total_inc6", "taxes_paid6", "ratio3", "year"))]
 str(clean)
 clean <- plyr::rename(x = clean,
                              replace = c("total_inc6" = "total_inc",
@@ -201,7 +200,7 @@ clean <- plyr::rename(x = clean,
                                          "ratio3" = "ratio"
                              ))
 
-
+## now we have a clean and tidy dataset!
 
 
 
