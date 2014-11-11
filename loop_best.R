@@ -88,6 +88,55 @@ for (i in 1:28){
 
 tables2011$year <- 2011
 
+## 2010 data
+tables2010 = data.frame()
+
+for (i in 1:29){
+  
+  # URL with the medals table
+  URL_temp2010 <- paste0('http://www.taloussanomat.fi/verotiedot/2010/suurituloisimmat/?n=', i)
+  if (i==1) { tables2010 <- URL_temp2010 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+              tables2010 <- tables2010[[1]] }
+  else if (i!=1){
+    #### Gather content and parse all tables ####
+    table_temp2010 <- URL_temp2010 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+        
+    # select first table with taxData
+    tables_df_temp2010 <- table_temp2010[[1]]
+    
+    tables2010 <- rbind(tables2010, tables_df_temp2010)
+  }
+  ##end loop
+}
+
+tables2010$year <- 2010
+
+## 2009 data
+tables2009 = data.frame()
+
+for (i in 1:25){
+  
+  # URL with the medals table
+  URL_temp2009 <- paste0('http://www.taloussanomat.fi/verotiedot/2009/suurituloisimmat/?n=', i)
+  if (i==1) { tables2009 <- URL_temp2009 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+              tables2009 <- tables2009[[1]] }
+  else if (i!=1){
+    #### Gather content and parse all tables ####
+    table_temp2009 <- URL_temp2009 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
+    
+    # select first table with taxData
+    tables_df_temp2009 <- table_temp2009[[1]]
+    
+    tables2009 <- rbind(tables2009, tables_df_temp2009)
+  }
+  ##end loop
+}
+
+tables2009$year <- 2009
+
+
+
+
 all2011_2013 <- rbind(tables2011, tables2012, tables2013)
 
 
