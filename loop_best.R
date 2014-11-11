@@ -167,7 +167,8 @@ all$taxes_paid6 <- as.numeric(all$taxes_paid5, length=9)
 summary(all$taxes_paid6)
 
 ## think of a better plot here
-#qplot(ratio3, taxes_paid6, data=all)
+qplot(ratio3, taxes_paid6, data=all)
+qplot(ratio3, taxes_paid6, data=all, ylim=c(0,15000))
 
 #boxplot(all$taxes_paid6)
 
@@ -201,7 +202,14 @@ clean <- plyr::rename(x = clean,
                              ))
 
 ## now we have a clean and tidy dataset!
+ratio0 <- clean$taxes_paid[clean$ratio == 1]
+below0tax <- clean$taxes_paid[clean$taxes_paid <= 1]
+table(clean$ratio0)
 
+# log transforming the income variables
+# add 1 to taxes paid if it is zero
+clean$log_taxes_paid <-log(clean$taxes_paid)
+clean$log_total_inc <- log(clean$total_inc)
 
 
 
