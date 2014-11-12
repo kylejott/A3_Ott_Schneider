@@ -264,8 +264,8 @@ FINAL <- within(FINAL, yr2013<-ifelse(year=="2013", 1, 0))
 # Create Dep Var
 ################
 
-FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009=1, "taxes_paid"]))
-share <- 
+FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"])) 
+ 
 
 
 
