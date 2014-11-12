@@ -244,11 +244,11 @@ FINAL <- merge(clean, Tax09.13,
 ################
 #Descriptive Statistics
 ################
-qplot(ratio3, data=all, geom="histogram")
+qplot(ratio, data=FINAL, geom="histogram")
 
 ## think of a better plot here
-qplot(ratio3, taxes_paid6, data=all)
-qplot(ratio3, taxes_paid6, data=all, ylim=c(0,15000))
+qplot(ratio, taxes_paid, data=FINAL)
+qplot(ratio, taxes_paid, data=FINAL, ylim=c(0,15000))
 
 #boxplot(all$taxes_paid6)
 
