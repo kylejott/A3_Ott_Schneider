@@ -265,9 +265,10 @@ FINAL <- within(FINAL, yr2013<-ifelse(year=="2013", 1, 0))
 ################
 
 FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"])) 
- 
-
-
+FINAL$total2010 <- with(FINAL, sum(FINAL[yr2010==1, "taxes_paid"])) 
+FINAL$total2011 <- with(FINAL, sum(FINAL[yr2011==1, "taxes_paid"]))  
+FINAL$total2012 <- with(FINAL, sum(FINAL[yr2012==1, "taxes_paid"])) 
+FINAL$total2013 <- with(FINAL, sum(FINAL[yr2013==1, "taxes_paid"])) 
 
 
 
