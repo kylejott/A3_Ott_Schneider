@@ -37,11 +37,13 @@ as.numeric('Year', 'Total_Tax_Revenue' )
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
 ################
-# Tax Rates
+# Tax Rates & Delta Tax Rates & GDP
 ################
 
-Tax09.13$Tax_Rate <- c("30,50", "30,00", "30,00","29,75","31,75")
-as.numeric('Tax_Rate')
+Tax09.13$Tax_Rate <- c("30.50", "30.00", "30.00","29.75","31.75")
+Tax09.13$Total_GDP <- c("181.664", "187.100", "191.910","189.111","186.831")
+Tax09.13$DELTA_Tax_Rate <- c("NA", "0.5", "0","-0.25","1.0")
+as.numeric('Tax_Rate','Total_GDP','DELTA_Tax_Rate')
 
 ################
 # Merge Data Sets
