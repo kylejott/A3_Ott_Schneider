@@ -9,6 +9,10 @@ library(XML)
 library(ggplot2)
 library(stringr)
 library(car)
+library(devtools)
+library(rsdmx)
+
+
 
 ## 2013 data
 tables2013 = data.frame()
@@ -224,7 +228,8 @@ names(Tax09.12)[2] <- "Total_Tax_Revenue"
 # Tax Revenues 2013
 ################
 
-Tax13 <- data.frame(year="2013", Total_Tax_Revenue ="30.780")
+Tax09.12$Total_Tax_Revenue <- Tax09.12$Total_Tax_Revenue*1000000000
+Tax13 <- data.frame(year="2013", Total_Tax_Revenue ="30780000000")
 as.numeric('Year', 'Total_Tax_Revenue' )
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
@@ -234,7 +239,7 @@ Tax09.13 <- rbind( Tax09.12, Tax13 )
 
 Tax09.13$Tax_Rate <- c("30.50", "30.00", "30.00","29.75","31.75")
 # GDP in constant prices, national base year
-Tax09.13$Total_GDP <- c("181.664", "187.100", "191.910","189.111","186.831")
+Tax09.13$Total_GDP <- c("181664000000", "187100000000", "191910000000","189111000000","186831000000")
 Tax09.13$DELTA_Tax_Rate <- c("NA", "0.5", "0","-0.25","1.0")
 as.numeric('Tax_Rate','Total_GDP','DELTA_Tax_Rate')
 
@@ -256,6 +261,17 @@ FINAL <- within(FINAL, yr2012<-ifelse(year=="2012", 1, 0))
 FINAL <- within(FINAL, yr2013<-ifelse(year=="2013", 1, 0))
 
 ################
+# Create Dep Var
+################
+
+FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009=1, "taxes_paid"]))
+share <- 
+
+
+
+
+
+################
 #Descriptive Statistics
 ################
 qplot(ratio, data=FINAL, geom="histogram")
@@ -265,6 +281,10 @@ qplot(ratio, taxes_paid, data=FINAL)
 qplot(ratio, taxes_paid, data=FINAL, ylim=c(0,15000))
 
 #boxplot(all$taxes_paid6)
+
+
+
+
 
 car::scatterplotMatrix(clean)
 
