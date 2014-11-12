@@ -190,14 +190,15 @@ clean <- plyr::rename(x = clean,
                              ))
 
 ## now we have a clean and tidy dataset!
-ratio0 <- clean$taxes_paid[clean$ratio == 1]
-below0tax <- clean$taxes_paid[clean$taxes_paid <= 1]
-table(clean$ratio0)
+
+
+# add 0.1 to taxes paid if it is zero
+clean$taxes_paid <- replace(clean$taxes_paid,taxes_paid==0, 0.1)
 
 # log transforming the income variables
-# add 1 to taxes paid if it is zero
 clean$log_taxes_paid <-log(clean$taxes_paid)
 clean$log_total_inc <- log(clean$total_inc)
+
 
 #################
 # OECD: Tax Revenues 2009 - 2012
