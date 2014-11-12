@@ -135,11 +135,10 @@ for (i in 1:25){
 
 tables2009$year <- 2009
 
-
 all <- rbind(tables2009, tables2010, tables2011, tables2012, tables2013)
 
-
 class(all$year)
+
 #changing the titles to english
 all <- plyr::rename(x = all,
                            replace = c("Nimi" = "name",
@@ -155,8 +154,6 @@ summary(all$ratio2)
 all$ratio3 <- as.numeric(all$ratio2, length=2)
 summary(all$ratio3)
 
-qplot(ratio3, data=all, geom="histogram")
-
 #cleaning taxes_paid
 sub(' â¬ $', '',all$taxes_paid)
 all$taxes_paid2 <- sub(' â¬$', '',all$taxes_paid)
@@ -166,13 +163,6 @@ all$taxes_paid5 <-sub(' ', '',all$taxes_paid4)
 all$taxes_paid6 <- as.numeric(all$taxes_paid5, length=9)
 summary(all$taxes_paid6)
 
-## think of a better plot here
-qplot(ratio3, taxes_paid6, data=all)
-qplot(ratio3, taxes_paid6, data=all, ylim=c(0,15000))
-
-#boxplot(all$taxes_paid6)
-
-
 #cleaning total_inc
 all$total_inc2 <- sub(' â¬$', '',all$total_inc)
 all$total_inc3 <- str_trim(all$total_inc2)
@@ -180,8 +170,6 @@ all$total_inc4 <-sub(' ', '',all$total_inc3)
 all$total_inc5 <-sub(' ', '',all$total_inc4)
 all$total_inc6 <- as.numeric(all$total_inc5, length=13)
 summary(all$total_inc6)
-
-## think of a better plot here
 
 #dropping name and keeping rank in given year
 all$name2 <- str_sub(all$name, 1, 5)
@@ -211,24 +199,56 @@ table(clean$ratio0)
 clean$log_taxes_paid <-log(clean$taxes_paid)
 clean$log_total_inc <- log(clean$total_inc)
 
+#################
+# OECD: Tax Revenues 2009 - 2012
+#################
 
+# URL
+URL <- 'http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/REV/NES.1000.TAXNAT.FIN?startTime=2009&endTime=2012'
+sdmx <- readSDMX('http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/REV/NES.1000.TAXNAT.FIN?startTime=2009&endTime=2012')
 
-##from his class example
-#### Clean ####
-# Drop unwanted variables
-fintaxes <- select(fintaxes, -NULL.V2, -NULL.V5)
+# Data Frame
+Tax09.12 <- as.data.frame(sdmx)
 
+# Making It ****TiDDDDDYyyyyyYYYYyyy****
+drops <- c("GOV","TAX","TIME_FORMAT","Unit","PowerCode","VAR","COU")
+Tax09.12 <- Tax09.12[,!(names(Tax09.12) %in% drops)]
 
+as.numeric('obsTime', 'obsValue' )
 
-# Give new variable names
-names(fintaxes) <- c('Name', 'Total Rev', 'Total Paid Taxs', 'Tax Rate')
+names(Tax09.12)[1] <- "year"
+names(Tax09.12)[2] <- "Total_Tax_Revenue"
 
+################
+# Tax Revenues 2013
+################
 
+Tax13 <- data.frame(year="2013", Total_Tax_Revenue ="30.780")
+as.numeric('Year', 'Total_Tax_Revenue' )
+Tax09.13 <- rbind( Tax09.12, Tax13 )
 
+################
+# Tax Rates
+################
 
-# Convert variable classes
-medals$country <- as.character(medals$country)
-for (i in 2:5) medals[, i] <- as.integer(medals[, i])
+Tax09.13$Tax_Rate <- c("30,50", "30,00", "30,00","29,75","31,75")
+as.numeric('Tax_Rate')
 
-# Sort by total medals in descending order
-medals <- arrange(medals, desc(total))
+################
+# Merge Data Sets
+################
+
+FINAL <- merge(clean, Tax09.13,
+               by = c('year'))
+
+################
+#Descriptive Statistics
+################
+qplot(ratio3, data=all, geom="histogram")
+
+## think of a better plot here
+qplot(ratio3, taxes_paid6, data=all)
+qplot(ratio3, taxes_paid6, data=all, ylim=c(0,15000))
+
+#boxplot(all$taxes_paid6)
+

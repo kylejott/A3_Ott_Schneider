@@ -25,14 +25,14 @@ Tax09.12 <- Tax09.12[,!(names(Tax09.12) %in% drops)]
 
 as.numeric('obsTime', 'obsValue' )
 
-names(Tax09.12)[1] <- "Year"
+names(Tax09.12)[1] <- "year"
 names(Tax09.12)[2] <- "Total_Tax_Revenue"
 
 ################
 # Tax Revenues 2013
 ################
 
-Tax13 <- data.frame(Year="2013", Total_Tax_Revenue ="30.780")
+Tax13 <- data.frame(year="2013", Total_Tax_Revenue ="30.780")
 as.numeric('Year', 'Total_Tax_Revenue' )
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
@@ -40,8 +40,15 @@ Tax09.13 <- rbind( Tax09.12, Tax13 )
 # Tax Rates
 ################
 
-Tax09.13$Tax_Revenue <- c("30,50", "30,00", "30,00","29,75","31,75")
-as.numeric('Tax_Revenue')
+Tax09.13$Tax_Rate <- c("30,50", "30,00", "30,00","29,75","31,75")
+as.numeric('Tax_Rate')
+
+################
+# Merge Data Sets
+################
+
+FINAL <- merge(clean, Tax09.13,
+                  by = c('year'))
 
 ################
 # old try
