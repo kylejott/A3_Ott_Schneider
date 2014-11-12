@@ -232,6 +232,7 @@ Tax09.13 <- rbind( Tax09.12, Tax13 )
 ################
 
 Tax09.13$Tax_Rate <- c("30.50", "30.00", "30.00","29.75","31.75")
+# GDP in constant prices, national base year
 Tax09.13$Total_GDP <- c("181.664", "187.100", "191.910","189.111","186.831")
 Tax09.13$DELTA_Tax_Rate <- c("NA", "0.5", "0","-0.25","1.0")
 as.numeric('Tax_Rate','Total_GDP','DELTA_Tax_Rate')
@@ -242,6 +243,16 @@ as.numeric('Tax_Rate','Total_GDP','DELTA_Tax_Rate')
 
 FINAL <- merge(clean, Tax09.13,
                by = c('year'))
+
+################
+# Create Year Dummies
+################
+
+FINAL <- within(FINAL, yr2009<-ifelse(year=="2009", 1, 0))
+FINAL <- within(FINAL, yr2010<-ifelse(year=="2010", 1, 0))
+FINAL <- within(FINAL, yr2011<-ifelse(year=="2011", 1, 0))
+FINAL <- within(FINAL, yr2012<-ifelse(year=="2012", 1, 0))
+FINAL <- within(FINAL, yr2013<-ifelse(year=="2013", 1, 0))
 
 ################
 #Descriptive Statistics
