@@ -8,7 +8,7 @@ library(dplyr)
 library(XML)
 library(ggplot2)
 library(stringr)
-
+library(car)
 
 ## 2013 data
 tables2013 = data.frame()
@@ -193,7 +193,7 @@ clean <- plyr::rename(x = clean,
 
 
 # add 0.1 to taxes paid if it is zero
-clean$taxes_paid <- replace(clean$taxes_paid,taxes_paid==0, 0.1)
+clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid==0, 0.1)
 
 # log transforming the income variables
 clean$log_taxes_paid <-log(clean$taxes_paid)
@@ -265,4 +265,15 @@ qplot(ratio, taxes_paid, data=FINAL)
 qplot(ratio, taxes_paid, data=FINAL, ylim=c(0,15000))
 
 #boxplot(all$taxes_paid6)
+
+car::scatterplotMatrix(clean)
+
+logit1 <- glm(ratio ~ log_total_inc + year + rank, data = clean, family = 'binomial')
+confint(logit1)
+
+fitted <- with(clean,
+               data.frame(gre = mean(gre),
+                          gpa = mean(gpa),
+                          rank = factor(1:4)))
+
 
