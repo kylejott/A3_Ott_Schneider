@@ -1,0 +1,41 @@
+---
+title: '**The Finnish Top 0.4 Percent**: An Exploration of Top Tax Shares in Finland from 2009 to 2013'
+author: "Kyle Ott and Cornelius Schneider"
+date: "14 November 2014"
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+bibliography:
+- main1.bib
+- packages1.bib
+---
+
+\pagebreak
+
+# Introduction
+
+This is our introduction, state research question and motivate it a bit
+
+# Our Unique, Tidy, Open, Reproducible Dataset
+
+Briefly describe how we acquired the data
+
+# Descriptive Statistics of Our Data
+
+# Inferential Statistics: First Model Attemps
+
+# Conclusion: Further Analysis
+
+***
+
+This project used @CiteRStudio to create this research proposal.
+
+\pagebreak
+
+# References
+
+
+
+

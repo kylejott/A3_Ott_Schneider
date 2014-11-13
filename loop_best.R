@@ -11,6 +11,8 @@ library(stringr)
 library(car)
 library(devtools)
 library(rsdmx)
+library(stargazer)
+library(knitr)
 
 
 
@@ -197,7 +199,7 @@ clean <- plyr::rename(x = clean,
 
 
 # add 0.1 to taxes paid if it is zero
-clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid==0, 0.1)
+clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid<=1, 1)
 
 # log transforming the income variables
 clean$log_taxes_paid <-log(clean$taxes_paid)
@@ -223,25 +225,25 @@ as.numeric('obsTime', 'obsValue' )
 
 names(Tax09.12)[1] <- "year"
 names(Tax09.12)[2] <- "Total_Tax_Revenue"
+Tax09.12$year <- as.numeric(Tax09.12$year)
+Tax09.12$Total_Tax_Revenue <- as.numeric(Tax09.12$Total_Tax_Revenue)
 
 ################
 # Tax Revenues 2013
 ################
 
 Tax09.12$Total_Tax_Revenue <- Tax09.12$Total_Tax_Revenue*1000000000
-Tax13 <- data.frame(year="2013", Total_Tax_Revenue ="30780000000")
-as.numeric('Year', 'Total_Tax_Revenue' )
+Tax13 <- data.frame(year=2013, Total_Tax_Revenue =30780000000)
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
 ################
 # Tax Rates & Delta Tax Rates & GDP
 ################
 
-Tax09.13$Tax_Rate <- c("30.50", "30.00", "30.00","29.75","31.75")
+Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00,29.75,31.75)
 # GDP in constant prices, national base year
-Tax09.13$Total_GDP <- c("181664000000", "187100000000", "191910000000","189111000000","186831000000")
-Tax09.13$DELTA_Tax_Rate <- c("NA", "0.5", "0","-0.25","1.0")
-as.numeric('Tax_Rate','Total_GDP','DELTA_Tax_Rate')
+Tax09.13$Total_GDP <- c(181664000000, 187100000000, 191910000000,189111000000,186831000000)
+Tax09.13$DELTA_Tax_Rate <- c(NA, 0.5, 0,-0.25,1.0)
 
 ################
 # Merge Data Sets
@@ -254,21 +256,27 @@ FINAL <- merge(clean, Tax09.13,
 # Create Year Dummies
 ################
 
-FINAL <- within(FINAL, yr2009<-ifelse(year=="2009", 1, 0))
-FINAL <- within(FINAL, yr2010<-ifelse(year=="2010", 1, 0))
-FINAL <- within(FINAL, yr2011<-ifelse(year=="2011", 1, 0))
-FINAL <- within(FINAL, yr2012<-ifelse(year=="2012", 1, 0))
-FINAL <- within(FINAL, yr2013<-ifelse(year=="2013", 1, 0))
+FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
+FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
+FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
+FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
+FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
 
 ################
 # Create Dep Var
 ################
 
-FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"])) 
+FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"]))
 FINAL$total2010 <- with(FINAL, sum(FINAL[yr2010==1, "taxes_paid"])) 
 FINAL$total2011 <- with(FINAL, sum(FINAL[yr2011==1, "taxes_paid"]))  
 FINAL$total2012 <- with(FINAL, sum(FINAL[yr2012==1, "taxes_paid"])) 
 FINAL$total2013 <- with(FINAL, sum(FINAL[yr2013==1, "taxes_paid"])) 
+
+FINAL$share2009 <- FINAL$total2009/FINAL$Total_Tax_Revenue
+FINAL$share2010 <- FINAL$total2010/FINAL$Total_Tax_Revenue 
+FINAL$share2011 <- FINAL$total2011/FINAL$Total_Tax_Revenue 
+FINAL$share2012 <- FINAL$total2012/FINAL$Total_Tax_Revenue 
+FINAL$share2013 <- FINAL$total2013/FINAL$Total_Tax_Revenue 
 
 
 
