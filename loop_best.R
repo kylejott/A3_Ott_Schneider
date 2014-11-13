@@ -278,8 +278,6 @@ FINAL$share2011 <- FINAL$total2011/FINAL$Total_Tax_Revenue
 FINAL$share2012 <- FINAL$total2012/FINAL$Total_Tax_Revenue 
 FINAL$share2013 <- FINAL$total2013/FINAL$Total_Tax_Revenue 
 
-
-
 ################
 #Descriptive Statistics
 ################
