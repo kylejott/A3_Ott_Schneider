@@ -13,6 +13,7 @@ library(devtools)
 library(rsdmx)
 library(stargazer)
 library(knitr)
+library(ggplot2)
 
 
 
@@ -199,11 +200,6 @@ clean <- plyr::rename(x = clean,
 
 
 # add 0.1 to taxes paid if it is zero
-clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid<=1, 1)
-
-# log transforming the income variables
-clean$log_taxes_paid <-log(clean$taxes_paid)
-clean$log_total_inc <- log(clean$total_inc)
 
 
 #################
@@ -240,7 +236,7 @@ Tax09.13 <- rbind( Tax09.12, Tax13 )
 # Tax Rates & Delta Tax Rates & GDP
 ################
 
-Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00,29.75,31.75)
+Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00, 29.75,31.75)
 # GDP in constant prices, national base year
 Tax09.13$Total_GDP <- c(181664000000, 187100000000, 191910000000,189111000000,186831000000)
 Tax09.13$DELTA_Tax_Rate <- c(NA, 0.5, 0,-0.25,1.0)
@@ -278,12 +274,35 @@ FINAL$share2011 <- FINAL$total2011/FINAL$Total_Tax_Revenue
 FINAL$share2012 <- FINAL$total2012/FINAL$Total_Tax_Revenue 
 FINAL$share2013 <- FINAL$total2013/FINAL$Total_Tax_Revenue 
 
+share <- c(0.04898281, 0.06022747, 0.06752648, 0.06347982, 0.0770184)
+year <- c(2009, 2010, 2011, 2012, 2013)
+shares <- data.frame(year, share)
+
+
+FINAL <- merge(FINAL, shares,
+               by = c('year'))
+
 ################
 #Descriptive Statistics
 ################
-qplot(ratio, data=FINAL, geom="histogram")
+summary(FINAL$taxes_paid)
+summary(FINAL$total_inc)
+summary(FINAL$ratio)
+sd(FINAL$ratio)
 
-## think of a better plot here
+qplot(year, ratio, data=FINAL)
+qplot(year, ratio, data=FINAL)
+
+d <- density(FINAL$ratio) # returns the density data 
+plot(d) # plots the results
+
+hist(FINAL$total_inc, main = '')
+hist(FINAL$log_total_inc, main = '')
+
+
+hist(FINAL$taxes_paid, main = '')
+hist(FINAL$log_taxes_paid, main = '')
+
 qplot(ratio, taxes_paid, data=FINAL)
 qplot(ratio, taxes_paid, data=FINAL, ylim=c(0,15000))
 
