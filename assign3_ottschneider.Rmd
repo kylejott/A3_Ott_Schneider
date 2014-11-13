@@ -24,9 +24,9 @@ Briefly describe how we acquired the data
 
 # Descriptive Statistics of Our Data
 
-# Inferential Statistics: First Model Attemps
+# Inferential Statistics: First Model Attempts
 
-# Conclusion: Further Analysis
+# Conclusion: Further Analysis Needed
 
 ***
 

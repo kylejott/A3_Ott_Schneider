@@ -13,7 +13,7 @@ library(devtools)
 library(rsdmx)
 library(stargazer)
 library(knitr)
-library(ggplot2)
+library(CausalImpact)
 
 
 
@@ -252,27 +252,27 @@ FINAL <- merge(clean, Tax09.13,
 # Create Year Dummies
 ################
 
-FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
-FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
-FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
-FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
-FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
+#FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
+#FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
+#FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
+#FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
+#FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
 
 ################
 # Create Dep Var
 ################
 
-FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"]))
-FINAL$total2010 <- with(FINAL, sum(FINAL[yr2010==1, "taxes_paid"])) 
-FINAL$total2011 <- with(FINAL, sum(FINAL[yr2011==1, "taxes_paid"]))  
-FINAL$total2012 <- with(FINAL, sum(FINAL[yr2012==1, "taxes_paid"])) 
-FINAL$total2013 <- with(FINAL, sum(FINAL[yr2013==1, "taxes_paid"])) 
+#FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"]))
+#FINAL$total2010 <- with(FINAL, sum(FINAL[yr2010==1, "taxes_paid"])) 
+#FINAL$total2011 <- with(FINAL, sum(FINAL[yr2011==1, "taxes_paid"]))  
+#FINAL$total2012 <- with(FINAL, sum(FINAL[yr2012==1, "taxes_paid"])) 
+#FINAL$total2013 <- with(FINAL, sum(FINAL[yr2013==1, "taxes_paid"])) 
 
-FINAL$share2009 <- FINAL$total2009/FINAL$Total_Tax_Revenue
-FINAL$share2010 <- FINAL$total2010/FINAL$Total_Tax_Revenue 
-FINAL$share2011 <- FINAL$total2011/FINAL$Total_Tax_Revenue 
-FINAL$share2012 <- FINAL$total2012/FINAL$Total_Tax_Revenue 
-FINAL$share2013 <- FINAL$total2013/FINAL$Total_Tax_Revenue 
+#FINAL$share2009 <- FINAL$total2009/FINAL$Total_Tax_Revenue
+#FINAL$share2010 <- FINAL$total2010/FINAL$Total_Tax_Revenue 
+#FINAL$share2011 <- FINAL$total2011/FINAL$Total_Tax_Revenue 
+#FINAL$share2012 <- FINAL$total2012/FINAL$Total_Tax_Revenue 
+#FINAL$share2013 <- FINAL$total2013/FINAL$Total_Tax_Revenue 
 
 share <- c(0.04898281, 0.06022747, 0.06752648, 0.06347982, 0.0770184)
 year <- c(2009, 2010, 2011, 2012, 2013)
@@ -281,6 +281,7 @@ shares <- data.frame(year, share)
 
 FINAL <- merge(FINAL, shares,
                by = c('year'))
+
 
 ################
 #Descriptive Statistics
@@ -299,27 +300,42 @@ plot(d) # plots the results
 hist(FINAL$total_inc, main = '')
 hist(FINAL$log_total_inc, main = '')
 
-
 hist(FINAL$taxes_paid, main = '')
 hist(FINAL$log_taxes_paid, main = '')
 
-qplot(ratio, taxes_paid, data=FINAL)
-qplot(ratio, taxes_paid, data=FINAL, ylim=c(0,15000))
+qplot(ratio, total_inc, data=FINAL)
+qplot(ratio, total_inc, data=FINAL, ylim=c(0,2000000))
 
-#boxplot(all$taxes_paid6)
+# car::scatterplotMatrix(FINAL)
 
+FINAL <- within(FINAL, less30<-ifelse(ratio<30, 1, 0))
 
-
-
-
-car::scatterplotMatrix(clean)
-
-logit1 <- glm(ratio ~ log_total_inc + year + rank, data = clean, family = 'binomial')
+logit1 <- glm(less30 ~ log_total_inc, data = FINAL, family = 'binomial')
 confint(logit1)
 
-fitted <- with(clean,
-               data.frame(gre = mean(gre),
-                          gpa = mean(gpa),
-                          rank = factor(1:4)))
+fitted <- with(FINAL,data.frame(log_total_inc))
+fitted$predicted <- predict(logit1, newdata = fitted, type = 'response')
+qplot(fitted$predicted, log_total_inc, data = FINAL )
 
+FINAL <- within(FINAL, less25<-ifelse(ratio<25, 1, 0))
+logit2 <- glm(less25 ~ log_total_inc, data = FINAL, family = 'binomial')
+confint(logit2)
+
+fitted2 <- with(FINAL,data.frame(log_total_inc))
+fitted2$predicted2 <- predict(logit2, newdata = fitted2, type = 'response')
+qplot(fitted2$predicted2, log_total_inc, data = FINAL )
+
+logit3 <- glm(less30 ~ log_total_inc + Tax_Rate, data = FINAL, family = 'binomial')
+confint(logit3)
+
+fitted3 <- with(FINAL,data.frame(log_total_inc))
+fitted3$predicted3 <- predict(logit3, newdata = fitted3, type = 'response')
+qplot(fitted3$predicted3, log_total_inc, data = FINAL )
+
+
+
+# Causal Impact
+pre.period <- c(2009, 2010, 2011, 2012)
+post.period <- c(2013)
+impact <- CausalImpact(FINAL, pre.period, post.period)
 
