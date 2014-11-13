@@ -332,10 +332,15 @@ fitted3 <- with(FINAL,data.frame(log_total_inc))
 fitted3$predicted3 <- predict(logit3, newdata = fitted3, type = 'response')
 qplot(fitted3$predicted3, log_total_inc, data = FINAL )
 
-
-
 # Causal Impact
 pre.period <- c(2009, 2010, 2011, 2012)
 post.period <- c(2013)
 impact <- CausalImpact(FINAL, pre.period, post.period)
 
+##############
+# Running a Model
+##############
+
+M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP,data = FINAL)
+M2 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP+yr2009+yr2010+yr2011+yr2012+yr2013+DELTA_Tax_Rate*yr2009+DELTA_Tax_Rate*yr2010+DELTA_Tax_Rate*yr2011+DELTA_Tax_Rate*yr2012+DELTA_Tax_Rate*yr2013 ,data = FINAL)
+M3 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
