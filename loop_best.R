@@ -209,7 +209,11 @@ clean <- plyr::rename(x = clean,
 
 
 # add 1 to taxes paid if it is zero
+clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid<=1, 1)
 
+# log transforming the income variables
+clean$log_taxes_paid <-log(clean$taxes_paid)
+clean$log_total_inc <- log(clean$total_inc)
 
 ######## Scraping Macro Data
 
@@ -290,7 +294,7 @@ Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
 FINAL <- merge(FINAL, Pop09.13,
                by = c('year'))
 
-Create Year Dummies
+# Create Year Dummies
 FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
 FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
 FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
@@ -374,6 +378,8 @@ kable(sum3_table, align ='c', digits = c(0,4,4,1))
 summary(FINAL$taxes_paid)
 summary(FINAL$total_inc)
 summary(FINAL$ratio)
+summary(FINAL$log_taxes_paid)
+summary(FINAL$log_total_inc)
 
 #########
 # Figures
@@ -446,7 +452,7 @@ qplot(fitted3$predicted3, log_total_inc, data = FINAL )
 
 ## Our OLS model needs signficant improvement, is it even appropriate?
 
-M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP,data = FINAL)
+M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
 summary(M1)
 M2 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP+yr2009+yr2010+yr2011+yr2012+yr2013+DELTA_Tax_Rate*yr2009+DELTA_Tax_Rate*yr2010+DELTA_Tax_Rate*yr2011+DELTA_Tax_Rate*yr2012+DELTA_Tax_Rate*yr2013 ,data = FINAL)
 M3 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
