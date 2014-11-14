@@ -21,6 +21,8 @@ library(CausalImpact)
 # Our Unique, Tidy, Open, Reproducible Data 
 #################
 
+## this part is scraping from the newspaper website for the years 2009 to 2013
+
 # 2013 data
 tables2013 = data.frame()
 
@@ -78,6 +80,7 @@ tables2012$year <- 2012
 ## 2011 data
 tables2011 = data.frame()
 
+#note that for some years they don't have complete obs (15,000), which is why the loop is only up to 28 for the following year
 for (i in 1:28){
   
   # URL with the medals table
@@ -147,6 +150,7 @@ for (i in 1:25){
 
 tables2009$year <- 2009
 
+#appending scraped tables
 all <- rbind(tables2009, tables2010, tables2011, tables2012, tables2013)
 
 class(all$year)
@@ -204,9 +208,10 @@ clean <- plyr::rename(x = clean,
 ## now we have a clean and tidy dataset!
 
 
-# add 0.1 to taxes paid if it is zero
+# add 1 to taxes paid if it is zero
 
 
+######## Scraping Macro Data
 
 # OECD: Tax Revenues 2009 - 2012
 # URL
@@ -234,7 +239,6 @@ Tax13 <- data.frame(year=2013, Total_Tax_Revenue =30780000000)
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
 
-
 # GDP in constant prices, national base year
 Tax09.13$Total_GDP <- c(181664000000, 187100000000, 191910000000,189111000000,186831000000)
 
@@ -244,9 +248,11 @@ Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00, 29.75,31.75)
 Tax09.13$DELTA_Tax_Rate <- c(NA, 0.5, 0,-0.25,1.0)
 
 
-# Merge Data Sets
+# Merge Our Scraped, Cleaned Data Sets
 FINAL <- merge(clean, Tax09.13,
                by = c('year'))
+
+#### Gathering more data
 
 # OECD: Population Data 2009 - 2013
 # URL
@@ -284,13 +290,12 @@ Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
 FINAL <- merge(FINAL, Pop09.13,
                by = c('year'))
 
-# Create Year Dummies
-#FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
-#FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
-#FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
-#FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
-#FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
-
+Create Year Dummies
+FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
+FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
+FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
+FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
+FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
 
 # Create Dep Var
 #FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"]))
@@ -318,14 +323,17 @@ FINAL <- merge(FINAL, shares,
 #Descriptive Statistics
 ################
 
+# createing subsets just for further analysis and ease of calculations
 FINAL2009 <- subset(FINAL, year == 2009)
 FINAL2010 <- subset(FINAL, year == 2010)
 FINAL2011 <- subset(FINAL, year == 2011)
 FINAL2012 <- subset(FINAL, year == 2012)
 FINAL2013 <- subset(FINAL, year == 2013)
 
+# number of observations by year
 obs <- tally(group_by(FINAL, year))
 
+# creating first summary statistics table
 sum2_table <- merge(obs, Pop09.13,
                              by = c('year'))
 percent <- (obs$n / Pop09.13$WorkPop)*100
@@ -335,9 +343,11 @@ sum2_table <- merge(sum2_table, percent_of_working,
                     by = c('year'))
 sum2_table <- merge(sum2_table, Tax09.13,
                     by = c('year'))
-# Create better labels?
+# Caption not working?
+# This is our first table
 kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
 
+# Creating our Second Summary Table
 obs_all <- tally(FINAL)
 mean_inc <- mean(FINAL$total_inc)
 mean_tax <- mean(FINAL$taxes_paid)
@@ -353,7 +363,7 @@ tot_inc <- c(med_inc, mean_inc, sd_inc)
 tot_paid_taxes <- c(med_tax, mean_tax, sd_tax)
 ave_tax_rate <- c(med_ratio, mean_ratio, sd_ratio)
 
-# create table labels
+# creating table labels
 table3 <- c('Median', 'Mean', 'SD')
 sum3_table <- data.frame(table3, tot_inc, tot_paid_taxes, ave_tax_rate)
 
@@ -402,6 +412,7 @@ sharefigure + theme_bw(base_size = 13)
 # Inferential Statistics
 ##############
 
+# our probit models....
 
 FINAL <- within(FINAL, less30<-ifelse(ratio<30, 1, 0))
 
@@ -433,6 +444,7 @@ qplot(fitted3$predicted3, log_total_inc, data = FINAL )
 # post.period <- c(2013)
 # impact <- CausalImpact(FINAL, pre.period, post.period)
 
+## Our OLS model needs signficant improvement, is it even appropriate?
 
 M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP,data = FINAL)
 summary(M1)
