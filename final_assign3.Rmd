@@ -12,34 +12,10 @@ bibliography:
 - packages1.bib
 ---
 
-```{r, include=FALSE}
+```{r, message=FALSE, include=FALSE}
 pkgs <- c('httr', 'dplyr', 'XML', 'ggplot2', 'stringr', 'car', 'devtools', 'rsdmx', 'stargazer', 'knitr', 'CausalImpact' )
 repmis::LoadandCite(pkgs, file = 'packages1.bib')
 
-
-
-##################################
-# Assignment 3: Data Science Course
-# Kyle Ott & Cornelius Schneider
-# 14 November 2014
-##################################
-
-# Load packages
-library(httr)
-library(dplyr)
-library(XML)
-library(ggplot2)
-library(stringr)
-library(car)
-library(devtools)
-library(rsdmx)
-library(stargazer)
-library(knitr)
-library(CausalImpact)
-
-#################
-# Our Unique, Tidy, Open, Reproducible Data 
-#################
 
 ## this part is scraping from the newspaper website for the years 2009 to 2013
 
@@ -183,6 +159,31 @@ all <- plyr::rename(x = all,
                                        "Suhde" = "ratio"
                                        ))
 str(all)
+
+
+
+##################################
+# Assignment 3: Data Science Course
+# Kyle Ott & Cornelius Schneider
+# 14 November 2014
+##################################
+
+# Load packages
+library(httr)
+library(dplyr)
+library(XML)
+library(ggplot2)
+library(stringr)
+library(car)
+library(devtools)
+library(rsdmx)
+library(stargazer)
+library(knitr)
+library(CausalImpact)
+
+#################
+# Our Unique, Tidy, Open, Reproducible Data 
+#################
 
 #cleaning ratio
 all$ratio2 <- str_sub(all$ratio, 1, 2)
@@ -403,7 +404,7 @@ Based on this data, we created a couple of new variables that are helpful for ou
 
 ```{r, include='asis'}
 # This is our first table
-kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
+knitr::kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
 ```
 
 ```{r, include=FALSE}
@@ -429,7 +430,7 @@ sum3_table <- data.frame(table3, tot_inc, tot_paid_taxes, ave_tax_rate)
 ```
 
 ```{r, include='asis'}
-kable(sum3_table, align ='c', digits = c(0,4,4,1))
+knitr::kable(sum3_table, align ='c', digits = c(0,4,4,1))
 ```
 
 ```{r, include='asis'}
