@@ -11,7 +11,10 @@ bibliography:
 - main1.bib
 - packages1.bib
 ---
-
+```{r, include=FALSE}
+pkgs <- c('knitr', 'stargazer')
+repmis::LoadandCite(pkgs, file = 'packages1.bib')
+```
 \pagebreak
 
 # Introduction
@@ -23,6 +26,7 @@ This is our introduction, state research question and motivate it a bit
 Briefly describe how we acquired the data
 
 # Descriptive Statistics of Our Data
+
 
 # Inferential Statistics: First Model Attempts
 

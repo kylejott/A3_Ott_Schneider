@@ -234,11 +234,13 @@ Tax13 <- data.frame(year=2013, Total_Tax_Revenue =30780000000)
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
 
-# Tax Rates & Delta Tax Rates & GDP
-Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00, 29.75,31.75)
 
 # GDP in constant prices, national base year
 Tax09.13$Total_GDP <- c(181664000000, 187100000000, 191910000000,189111000000,186831000000)
+
+# Tax Rates & Delta Tax Rates & GDP
+Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00, 29.75,31.75)
+
 Tax09.13$DELTA_Tax_Rate <- c(NA, 0.5, 0,-0.25,1.0)
 
 
@@ -277,6 +279,7 @@ Pop09.13$WorkPop <- Pop09.13$PercWorkPop*Pop09.13$Population
 drops <- c("PercWorkPop","Population")
 Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
 
+
 # Merge Data Sets
 FINAL <- merge(FINAL, Pop09.13,
                by = c('year'))
@@ -314,6 +317,43 @@ FINAL <- merge(FINAL, shares,
 ################
 #Descriptive Statistics
 ################
+
+FINAL2009 <- subset(FINAL, year == 2009)
+FINAL2010 <- subset(FINAL, year == 2010)
+FINAL2011 <- subset(FINAL, year == 2011)
+FINAL2012 <- subset(FINAL, year == 2012)
+FINAL2013 <- subset(FINAL, year == 2013)
+
+obs <- tally(group_by(FINAL, year))
+
+sum2_table <- merge(obs, Pop09.13,
+                             by = c('year'))
+percent <- (obs$n / Pop09.13$WorkPop)*100
+percent_of_working <- data.frame(year, percent)
+
+sum2_table <- merge(sum2_table, percent_of_working,
+                    by = c('year'))
+sum2_table <- merge(sum2_table, Tax09.13,
+                    by = c('year'))
+
+kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
+
+
+# Create year labels
+medmeansd <- c('Median', 'Mean', 'SD')
+
+sum2009 <- data.frame()
+sum2009
+med2009 <- median(FINAL2009$taxes_paid)
+sum2009
+sumtax <- summary(FINAL2009$taxes_paid)
+suminc <- summary(FINAL2009$total_inc)
+sumratio <- summary(FINAL2009$ratio)
+s2009 <- data.frame(sumtax, suminc, sumratio)
+sumtax
+
+
+
 summary(FINAL$taxes_paid)
 summary(FINAL$total_inc)
 summary(FINAL$ratio)
