@@ -31,6 +31,7 @@ knitr::kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
 ```
 
 This is our introduction, state research question and motivate it a bit
+[@piketty2014inequality]
 
 # Our Unique, Tidy, Open, Reproducible Dataset
 
