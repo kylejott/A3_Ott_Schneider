@@ -11,7 +11,13 @@ bibliography:
 - main1.bib
 - packages1.bib
 ---
+
 ```{r, include=FALSE}
+pkgs <- c('httr', 'dplyr', 'XML', 'ggplot2', 'stringr', 'car', 'devtools', 'rsdmx', 'stargazer', 'knitr', 'CausalImpact' )
+repmis::LoadandCite(pkgs, file = 'packages1.bib')
+
+
+
 ##################################
 # Assignment 3: Data Science Course
 # Kyle Ott & Cornelius Schneider
@@ -223,7 +229,11 @@ clean <- plyr::rename(x = clean,
 
 
 # add 1 to taxes paid if it is zero
+clean$taxes_paid <- replace(clean$taxes_paid,clean$taxes_paid<=1, 1)
 
+# log transforming the income variables
+clean$log_taxes_paid <-log(clean$taxes_paid)
+clean$log_total_inc <- log(clean$total_inc)
 
 ######## Scraping Macro Data
 
@@ -304,7 +314,7 @@ Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
 FINAL <- merge(FINAL, Pop09.13,
                by = c('year'))
 
-Create Year Dummies
+# Create Year Dummies
 FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
 FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
 FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
@@ -359,17 +369,146 @@ sum2_table <- merge(sum2_table, Tax09.13,
                     by = c('year'))
 ```
 
+#Introduction
+
+The question about an “optimal” income taxation was always discussed against the background of classic economic theories: Income taxation should maximize a given social welfare function, that depicts a societies preference for equality. Furthermore, sacrifice theory of income taxation illustrates that redistribution should take place up to the point where marginal utilities  are equalized. 
+
+However, these theories completely neglect behavioral responses to taxation. According to the Laffer-Curve at one point a further increase of the tax rate would result in a loss in tax revenues due to negative labor supply responses.
+In a very recent work, [@piketty2014inequality] identifies additional reasons, why trends in top-income shares are correlated with the tax rates: Labor responses, evasion/avoidance responses and bargaining responses. 
+
+Whereas poverty is studied extensively in Economics through surveys and welfare programs, the current debate still lacks information about the top of the income distribution. The aim of this project is to inspect exactly this upper end of the income distribution. For this, we’ll analyze micro-level data from finish taxpayers of the years 2009 to 2013. 
+
+In Finland the tax on earned income is levied according to a progressive tax scale: Each tax payer has to pay a basic amount dependent on his earned income plus the tax rate within the respective tax bracket. The concrete tax scheme is decided annually by the Parliament. The relevant tax rates in the top tax-bracket were levied as follows: 
+
+* 2009: 30.5%
+* 2010: 30.0%
+* 2011: 30.0%
+* 2012: 29.75%
+* 2013: 31.75%
+
+Against this background, our paper’s purpose is to identify anomalies in the tax patterns of ultra-wealthy finish people. 
+In a first step, we will visualize how the share of the top 0.4% (wealthiest 15.000 individuals) in total income-tax revenue changes between 2009 and 2013. Following up, with inferential statistics we try to dig deeper into income-tax payer’s behavior: What is the predicted probability to pay a certain average tax rate given your income? What was the potential impact of changes in top tax-rates on ultra-wealthy finish people?
+Conditional on the first results, more precise models, as well as a suitable strategy to tackle the raised questions will be assessed. 
 
 # Our Unique, Tidy, Open, Reproducible Dataset
+The Nordic countries Finland, Sweden and Norway have a tradition of publishing everyone’s income and tax details every year. Whereas in Sweden and Norway this data is only accessible being a citizen and after pulling an official request, in Finland top income tax earners are public figures as a result of heightened media scrutiny on top income tax earners. Finland’s largest business online daily newspaper “Taloussanomat“ published the figures in a suitable format for our purpose: The top 15.000 income earners are displayed on yearly basis from 2009 to 2013, including their total income, taxed paid and average tax rate. 
 
-Briefly describe how we acquired the data
+In a first step we scraped the data from their homepage. Given that each year’s data was partitioned into 30 tables of 500 observations each, we wrote a loop in order to gather the date in one data frame. We ran that loop for each year and appended them into the same data frame. Moreover, we converted the strings with weird characters and various lengths into numeric class. Since there are some observations missing in the first three years (2009 to 2011), the final data set contains 70.402 observations.
+
+Afterwards, we merged that data frame with two tables from the OECD: One indicating the total Finnish income-tax revenues from 2009 to 2013 and one indicating the number of working population. In addition to that, we manually amended the total GDP in constant prices (national base year) as well as the respective top-tax rates for each year. 
+
+Based on this data, we created a couple of new variables that are helpful for our analysis: The rank based on the income of each individual in every year; the change in the tax rate compared to the previous year and the share of total income-revenues that the top 15.000 tax payers pay.
 
 # Descriptive Statistics of Our Data
 
+```{r, include=asis}
+# This is our first table
+kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
+```
+
+```{r, include=FALSE}
+# Creating our Second Summary Table
+obs_all <- tally(FINAL)
+mean_inc <- mean(FINAL$total_inc)
+mean_tax <- mean(FINAL$taxes_paid)
+mean_ratio <- mean(FINAL$ratio)
+med_inc <- median(FINAL$total_inc)
+med_tax <- median(FINAL$taxes_paid)
+med_ratio <- median(FINAL$ratio)
+sd_inc <- sd(FINAL$total_inc)
+sd_tax <- sd(FINAL$taxes_paid)
+sd_ratio <- sd(FINAL$ratio)
+
+tot_inc <- c(med_inc, mean_inc, sd_inc)
+tot_paid_taxes <- c(med_tax, mean_tax, sd_tax)
+ave_tax_rate <- c(med_ratio, mean_ratio, sd_ratio)
+
+# creating table labels
+table3 <- c('Median', 'Mean', 'SD')
+sum3_table <- data.frame(table3, tot_inc, tot_paid_taxes, ave_tax_rate)
+```
+
+```{r, include=asis}
+kable(sum3_table, align ='c', digits = c(0,4,4,1))
+```
+
+```{r, include=asis}
+# shows the average tax rate paid over the years, see that the range doesn't change all too much
+qplot(year, ratio, data=FINAL, main='Average Tax Rate Paid Across Years', ylab ='Average Tax Rate')
+```
+
+```{r, include=asis}
+# shows the income outliers in 2013; Q: should we drop them?
+qplot(year, total_inc, data=FINAL, main="Total Income by Year Highlighting 2013 Outliers", ylab = 'Total Annual Income')
+```
+
+```{r, include=asis}
+# plotting the density of the average tax rate
+d <- density(FINAL$ratio) # returns the density data 
+plot(d, main = 'Density Plot of Average Tax Rates') # plots the results
+```
+
+```{r, include=asis}
+# hist(FINAL$total_inc, main = '')
+# income looks slightly better after logging it
+hist(FINAL$log_total_inc, main = 'Histogram of Logged Total Income', xlab = 'Log Total Annual Income')
+```
+
+```{r, include=asis}
+# hist(FINAL$taxes_paid, main = '')
+# taxes paid looks slightly better after logging it
+hist(FINAL$log_taxes_paid, main = 'Histogram of Logged Total Taxes', xlab = 'Log Paid Taxes')
+```
+
+```{r, include=asis}
+# plotting income against tax rate
+qplot(ratio, log_total_inc, data=FINAL, ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate Against Annual Total Income")
+```
+
+```{r, include=asis}
+qplot(ratio, log_total_inc, data=FINAL, xlim=c(0,31), ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate < 31% Against Log Annual Total Incomes")
+```
+
+```{r, include=asis}
+sharefigure <- qplot(shares$year, shares$share, caption='Top 0.4% Share of Total Paid Finnish Taxes', ylim=c(0.04, 0.08), geom='line', ylab='Total Finnish Taxes Share Paid by Top 0.4%', xlab='Year')
+sharefigure + theme_bw(base_size = 13)
+```
 
 # Inferential Statistics: First Model Attempts
+```{r, include=FALSE}
+FINAL <- within(FINAL, less30<-ifelse(ratio<30, 1, 0))
+logit1 <- glm(less30 ~ log_total_inc, data = FINAL, family = 'binomial')
+summary(logit1)
+confint(logit1)
+fitted <- with(FINAL,data.frame(log_total_inc))
+fitted$predicted <- predict(logit1, newdata = fitted, type = 'response')
+```
+
+```{r, include=asis}
+qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability Individual Would Have an Average Tax Rate Below 30' )
+```
+
+
+```{r, include=asis}
+M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
+summary(M1)
+
+# Create cleaner covariate labels
+labels <- c('(Intercept)', 'Top tax rate', 'Change in top tax rate',
+            'Log total GDP')
+```
+```{r, include=asis}
+stargazer::stargazer(M1, covariate.labels = labels,
+                     title = 'Inappropriate Model, First Try',
+                     type = 'latex', header = FALSE)
+```
+
 
 # Conclusion: Further Analysis Needed
+After having conducted first descriptive as well as inferential statistics it became quite clear that a better model is needed. Especially the attempt to analyze the top income-tax share dependent on the tax rate by running an ordinary least squares model has failed so far. Obviously controlling for GDP and considering year dummies didn’t lead to the expected outcome: We’re still considering to incorporate other data to build a worthy model. 
+
+
+
 
 ***
 

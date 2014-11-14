@@ -409,7 +409,7 @@ qplot(ratio, log_total_inc, data=FINAL, xlim=c(0,31), ylab  = 'Log Total Annual 
 
 # car::scatterplotMatrix(FINAL)
 
-# plotting ]
+# plotting
 
 sharefigure <- qplot(shares$year, shares$share, caption='Top 0.4% Share of Total Paid Finnish Taxes', ylim=c(0.04, 0.08), geom='line', ylab='Total Finnish Taxes Share Paid by Top 0.4%', xlab='Year')
 sharefigure + theme_bw(base_size = 13)
@@ -421,13 +421,12 @@ sharefigure + theme_bw(base_size = 13)
 # our probit models....
 
 FINAL <- within(FINAL, less30<-ifelse(ratio<30, 1, 0))
-
 logit1 <- glm(less30 ~ log_total_inc, data = FINAL, family = 'binomial')
+summary(logit1)
 confint(logit1)
-
 fitted <- with(FINAL,data.frame(log_total_inc))
 fitted$predicted <- predict(logit1, newdata = fitted, type = 'response')
-qplot(fitted$predicted, log_total_inc, data = FINAL )
+qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability Individual Would Have an Average Tax Rate Below 30' )
 
 FINAL <- within(FINAL, less25<-ifelse(ratio<25, 1, 0))
 logit2 <- glm(less25 ~ log_total_inc, data = FINAL, family = 'binomial')
@@ -454,6 +453,16 @@ qplot(fitted3$predicted3, log_total_inc, data = FINAL )
 
 M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
 summary(M1)
+
+# Create cleaner covariate labels
+labels <- c('(Intercept)', 'Top tax rate', 'Change in top tax rate',
+            'Log total GDP')
+
+stargazer::stargazer(M1, covariate.labels = labels,
+                     title = 'Inappropriate Model, First Try',
+                     type = 'latex', header = FALSE)
+
+
 M2 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP+yr2009+yr2010+yr2011+yr2012+yr2013+DELTA_Tax_Rate*yr2009+DELTA_Tax_Rate*yr2010+DELTA_Tax_Rate*yr2011+DELTA_Tax_Rate*yr2012+DELTA_Tax_Rate*yr2013 ,data = FINAL)
 M3 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
 M4 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP), year==2013, data = FINAL)
