@@ -335,46 +335,73 @@ sum2_table <- merge(sum2_table, percent_of_working,
                     by = c('year'))
 sum2_table <- merge(sum2_table, Tax09.13,
                     by = c('year'))
-
+# Create better labels?
 kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
 
+obs_all <- tally(FINAL)
+mean_inc <- mean(FINAL$total_inc)
+mean_tax <- mean(FINAL$taxes_paid)
+mean_ratio <- mean(FINAL$ratio)
+med_inc <- median(FINAL$total_inc)
+med_tax <- median(FINAL$taxes_paid)
+med_ratio <- median(FINAL$ratio)
+sd_inc <- sd(FINAL$total_inc)
+sd_tax <- sd(FINAL$taxes_paid)
+sd_ratio <- sd(FINAL$ratio)
 
-# Create year labels
-medmeansd <- c('Median', 'Mean', 'SD')
+tot_inc <- c(med_inc, mean_inc, sd_inc)
+tot_paid_taxes <- c(med_tax, mean_tax, sd_tax)
+ave_tax_rate <- c(med_ratio, mean_ratio, sd_ratio)
 
-sum2009 <- data.frame()
-sum2009
-med2009 <- median(FINAL2009$taxes_paid)
-sum2009
-sumtax <- summary(FINAL2009$taxes_paid)
-suminc <- summary(FINAL2009$total_inc)
-sumratio <- summary(FINAL2009$ratio)
-s2009 <- data.frame(sumtax, suminc, sumratio)
-sumtax
+# create table labels
+table3 <- c('Median', 'Mean', 'SD')
+sum3_table <- data.frame(table3, tot_inc, tot_paid_taxes, ave_tax_rate)
 
+kable(sum3_table, align ='c', digits = c(0,4,4,1))
+#why won't this work: , caption = "Quick Summary Statistics on Tax Records Dataset N = 70402"
 
-
+#overall summary statistics
 summary(FINAL$taxes_paid)
 summary(FINAL$total_inc)
 summary(FINAL$ratio)
-sd(FINAL$ratio)
 
-qplot(year, ratio, data=FINAL)
-qplot(year, ratio, data=FINAL)
+#########
+# Figures
+#########
 
+# shows the average tax rate paid over the years, see that the range doesn't change all too much
+qplot(year, ratio, data=FINAL, main='Average Tax Rate Paid Across Years', ylab ='Average Tax Rate')
+
+# shows the income outliers in 2013; Q: should we drop them?
+qplot(year, total_inc, data=FINAL, main="Total Income by Year Highlighting 2013 Outliers", ylab = 'Total Annual Income')
+
+# plotting the density of the average tax rate
 d <- density(FINAL$ratio) # returns the density data 
-plot(d) # plots the results
+plot(d, main = 'Density Plot of Average Tax Rates') # plots the results
 
-hist(FINAL$total_inc, main = '')
-hist(FINAL$log_total_inc, main = '')
+# hist(FINAL$total_inc, main = '')
+# income looks slightly better after logging it
+hist(FINAL$log_total_inc, main = 'Histogram of Logged Total Income', xlab = 'Log Total Annual Income')
 
-hist(FINAL$taxes_paid, main = '')
-hist(FINAL$log_taxes_paid, main = '')
+# hist(FINAL$taxes_paid, main = '')
+# taxes paid looks slightly better after logging it
+hist(FINAL$log_taxes_paid, main = 'Histogram of Logged Total Taxes', xlab = 'Log Paid Taxes')
 
-qplot(ratio, total_inc, data=FINAL)
-qplot(ratio, total_inc, data=FINAL, ylim=c(0,2000000))
+# plotting income against tax rate
+qplot(ratio, log_total_inc, data=FINAL, ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate Against Annual Total Income")
+qplot(ratio, log_total_inc, data=FINAL, xlim=c(0,31), ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate < 31% Against Log Annual Total Incomes")
 
 # car::scatterplotMatrix(FINAL)
+
+# plotting ]
+
+sharefigure <- qplot(shares$year, shares$share, caption='Top 0.4% Share of Total Paid Finnish Taxes', ylim=c(0.04, 0.08), geom='line', ylab='Total Finnish Taxes Share Paid by Top 0.4%', xlab='Year')
+sharefigure + theme_bw(base_size = 13)
+
+##############
+# Inferential Statistics
+##############
+
 
 FINAL <- within(FINAL, less30<-ifelse(ratio<30, 1, 0))
 
@@ -401,13 +428,11 @@ fitted3$predicted3 <- predict(logit3, newdata = fitted3, type = 'response')
 qplot(fitted3$predicted3, log_total_inc, data = FINAL )
 
 # Causal Impact
-pre.period <- c(2009, 2010, 2011, 2012)
-post.period <- c(2013)
-impact <- CausalImpact(FINAL, pre.period, post.period)
+# will look into this at a later time 
+# pre.period <- c(2009, 2010, 2011, 2012)
+# post.period <- c(2013)
+# impact <- CausalImpact(FINAL, pre.period, post.period)
 
-##############
-# Inferential Statistics
-##############
 
 M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP,data = FINAL)
 summary(M1)
