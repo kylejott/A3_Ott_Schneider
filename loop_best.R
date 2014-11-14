@@ -1,6 +1,8 @@
-#################
-# first scrape
-#################
+##################################
+# Assignment 3: Data Science Course
+# Kyle Ott & Cornelius Schneider
+# 14 November 2014
+##################################
 
 # Load packages
 library(httr)
@@ -15,19 +17,22 @@ library(stargazer)
 library(knitr)
 library(CausalImpact)
 
+#################
+# Our Unique, Tidy, Open, Reproducible Data 
+#################
 
-
-## 2013 data
+# 2013 data
 tables2013 = data.frame()
 
 for (i in 1:30){
 
-# URL with the medals table
+# URL with the ta table
 URL_temp2013 <- paste0('http://www.taloussanomat.fi/verotiedot/2013/suurituloisimmat/?n=', i)
 if (i==1) { tables2013 <- URL_temp2013 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
             tables2013 <- tables2013[[1]] }
 else if (i!=1){
-#### Gather content and parse all tables ####
+
+  # Gather content and parse all tables #
 table_temp2013 <- URL_temp2013 %>% GET() %>% content(as = 'parsed') %>% readHTMLTable()
 
 # Identify correct table
@@ -39,11 +44,11 @@ tables_df_temp2013 <- table_temp2013[[1]]
 tables2013 <- rbind(tables2013, tables_df_temp2013)
 
 }
-##end loop
+#end loop
 }
 tables2013$year <- 2013
 
-## 2012 data
+# 2012 data
 tables2012 = data.frame()
 
 for (i in 1:30){
@@ -91,12 +96,12 @@ for (i in 1:28){
     
     tables2011 <- rbind(tables2011, tables_df_temp2011)
   }
-  ##end loop
+  #end loop
 }
 
 tables2011$year <- 2011
 
-## 2010 data
+# 2010 data
 tables2010 = data.frame()
 
 for (i in 1:29){
@@ -202,10 +207,8 @@ clean <- plyr::rename(x = clean,
 # add 0.1 to taxes paid if it is zero
 
 
-#################
-# OECD: Tax Revenues 2009 - 2012
-#################
 
+# OECD: Tax Revenues 2009 - 2012
 # URL
 URL <- 'http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/REV/NES.1000.TAXNAT.FIN?startTime=2009&endTime=2012'
 sdmx <- readSDMX('http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/REV/NES.1000.TAXNAT.FIN?startTime=2009&endTime=2012')
@@ -213,7 +216,7 @@ sdmx <- readSDMX('http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/REV/NES.1000.
 # Data Frame
 Tax09.12 <- as.data.frame(sdmx)
 
-# Making It ****TiDDDDDYyyyyyYYYYyyy****
+# Making It Tidy
 drops <- c("GOV","TAX","TIME_FORMAT","Unit","PowerCode","VAR","COU")
 Tax09.12 <- Tax09.12[,!(names(Tax09.12) %in% drops)]
 
@@ -224,44 +227,69 @@ names(Tax09.12)[2] <- "Total_Tax_Revenue"
 Tax09.12$year <- as.numeric(Tax09.12$year)
 Tax09.12$Total_Tax_Revenue <- as.numeric(Tax09.12$Total_Tax_Revenue)
 
-################
-# Tax Revenues 2013
-################
 
+# Tax Revenues 2013
 Tax09.12$Total_Tax_Revenue <- Tax09.12$Total_Tax_Revenue*1000000000
 Tax13 <- data.frame(year=2013, Total_Tax_Revenue =30780000000)
 Tax09.13 <- rbind( Tax09.12, Tax13 )
 
-################
-# Tax Rates & Delta Tax Rates & GDP
-################
 
+# Tax Rates & Delta Tax Rates & GDP
 Tax09.13$Tax_Rate <- c(30.50, 30.00, 30.00, 29.75,31.75)
+
 # GDP in constant prices, national base year
 Tax09.13$Total_GDP <- c(181664000000, 187100000000, 191910000000,189111000000,186831000000)
 Tax09.13$DELTA_Tax_Rate <- c(NA, 0.5, 0,-0.25,1.0)
 
-################
-# Merge Data Sets
-################
 
+# Merge Data Sets
 FINAL <- merge(clean, Tax09.13,
                by = c('year'))
 
-################
-# Create Year Dummies
-################
+# OECD: Population Data 2009 - 2013
+# URL
+URL <- 'http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/POP_FIVE_HIST/FIN.YP99TLL1_ST.TT.A?startTime=2009&endTime=2013'
+sdmx <- readSDMX('http://stats.oecd.org/restsdmx/sdmx.ashx/GetData/POP_FIVE_HIST/FIN.YP99TLL1_ST.TT.A?startTime=2009&endTime=2013')
 
+# Data Frame
+Pop09.13 <- as.data.frame(sdmx)
+
+# Making It Tidy
+drops <- c("LOCATION","SUBJECT","SEX","FREQUENCY","TIME_FORMAT","Unit","OBS_STATUS")
+Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
+
+as.numeric('obsTime', 'obsValue' )
+
+names(Pop09.13)[1] <- "year"
+names(Pop09.13)[2] <- "Population"
+Pop09.13$year <- as.numeric(Pop09.13$year)
+Pop09.13$Population <- as.numeric(Pop09.13$Population)
+
+PercWorkPop <- c(0.6645439, 0.661943, 0.6570156, 0.6510898  , 0.6449715)
+year <- c(2009, 2010, 2011, 2012, 2013)
+WorkPop <- data.frame(year, PercWorkPop)
+
+Pop09.13 <- merge(WorkPop, Pop09.13,
+               by = c('year'))
+
+Pop09.13$WorkPop <- Pop09.13$PercWorkPop*Pop09.13$Population 
+
+drops <- c("PercWorkPop","Population")
+Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
+
+# Merge Data Sets
+FINAL <- merge(FINAL, Pop09.13,
+               by = c('year'))
+
+# Create Year Dummies
 #FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
 #FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
 #FINAL <- within(FINAL, yr2011<-ifelse(year==2011, 1, 0))
 #FINAL <- within(FINAL, yr2012<-ifelse(year==2012, 1, 0))
 #FINAL <- within(FINAL, yr2013<-ifelse(year==2013, 1, 0))
 
-################
-# Create Dep Var
-################
 
+# Create Dep Var
 #FINAL$total2009 <- with(FINAL, sum(FINAL[yr2009==1, "taxes_paid"]))
 #FINAL$total2010 <- with(FINAL, sum(FINAL[yr2010==1, "taxes_paid"])) 
 #FINAL$total2011 <- with(FINAL, sum(FINAL[yr2011==1, "taxes_paid"]))  
@@ -338,9 +366,14 @@ post.period <- c(2013)
 impact <- CausalImpact(FINAL, pre.period, post.period)
 
 ##############
-# Running a Model
+# Inferential Statistics
 ##############
 
 M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP,data = FINAL)
+summary(M1)
 M2 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+Total_GDP+yr2009+yr2010+yr2011+yr2012+yr2013+DELTA_Tax_Rate*yr2009+DELTA_Tax_Rate*yr2010+DELTA_Tax_Rate*yr2011+DELTA_Tax_Rate*yr2012+DELTA_Tax_Rate*yr2013 ,data = FINAL)
 M3 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
+M4 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP), year==2013, data = FINAL)
+summary(M4)
+M5 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP), year>=2012, data = FINAL)
+summary(M5)
