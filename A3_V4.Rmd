@@ -1,16 +1,16 @@
+---
 title: '**The Finnish Top 0.4 Percent**: An Exploration of Top Tax Shares in Finland from 2009 to 2013'
 author: "Kyle Ott and Cornelius Schneider"
 date: "14 November 2014"
 output:
   pdf_document:
-    fig_caption: yes
     number_sections: yes
     toc: yes
 bibliography:
 - main1.bib
 - packages1.bib
 ---
-
+\pagebreak
 ```{r, include=FALSE}
 pkgs <- c('httr', 'dplyr', 'XML', 'ggplot2', 'stringr', 'car', 'devtools', 'rsdmx', 'stargazer', 'knitr', 'CausalImpact' )
 repmis::LoadandCite(pkgs, file = 'packages1.bib')
@@ -41,7 +41,9 @@ library(CausalImpact)
 #################
 
 ## this part is scraping from the newspaper website for the years 2009 to 2013
+```
 
+```{r, include=FALSE, cache=TRUE}
 # 2013 data
 tables2013 = data.frame()
 
@@ -171,6 +173,14 @@ tables2009$year <- 2009
 
 #appending scraped tables
 all <- rbind(tables2009, tables2010, tables2011, tables2012, tables2013)
+
+save(all, file = "/Users/Kyle/Dropbox/!Fall_2014/Collab_Data/A3_Ott_Schneider/all.RData")
+
+
+```
+
+```{r, include=FALSE}
+load("/Users/Kyle/Dropbox/!Fall_2014/Collab_Data/A3_Ott_Schneider/all.RData")
 
 class(all$year)
 
@@ -398,12 +408,18 @@ Afterwards, we merged that data frame with two tables from the OECD: One indicat
 
 Based on this data, we created a couple of new variables that are helpful for our analysis: The rank based on the income of each individual in every year; the change in the tax rate compared to the previous year and the share of total income-revenues that the top 15.000 tax payers pay.
 
-# Descriptive Statistics of Our Data
+Before we continue to the descriptive analysis, just one note on the origins of our various data. First, as already mentioned, all of the micro-level income data comes from taloussanomat, the income tax revenue for 2013 comes from @incometaxrev2013, the income tax revenue for 2009-2012 comes from @oecdstatsinctax0912, the population data comes from @oecdstatspopulation, the income tax scheme for 2013 comes from @nordisketax, the income tax scheme for 2012 comes from @kpmg, the income tax scheme for 2011 comes from @wikipediaTax, our income tax scheme for 2010 comes from @crowe2010worldwide, and the income tax scheme for 2009 comes from @tax2009finland.
 
-```{r, include='asis'}
+# Descriptive Statistics of Our Data
+In the table below, you will see the breakdown of the data by: year, number of observation ("n"), total working population in Finland in given year, share in working population presented by top 15,000 income earners, total tax revenues collected (in Euros), total GDP (in constant prices national base year), top income tax rate, and the change of this tax rate by year.
+
+
+```{r, results='asis', echo=FALSE}
 # This is our first table
 knitr::kable(sum2_table, align ='c', digits = c(4,5,7,2,12,13,4,3))
 ```
+
+The table below shows a quick summary statistics about the distribution of our data and three key variables of interest over all five years: total annual income, total paid taxes, and the average tax rate. 
 
 ```{r, include=FALSE}
 # Creating our Second Summary Table
@@ -427,48 +443,60 @@ table3 <- c('Median', 'Mean', 'SD')
 sum3_table <- data.frame(table3, tot_inc, tot_paid_taxes, ave_tax_rate)
 ```
 
-```{r, include='asis'}
+
+```{r, results='asis', echo=FALSE}
 knitr::kable(sum3_table, align ='c', digits = c(0,4,4,1))
 ```
 
-```{r, include='asis'}
+The figure below shows the range of average tax rates paid each year across all observations. It was included to visually display the range as it slightly changes across time.
+
+
+
+```{r, results='asis', echo=FALSE}
 # shows the average tax rate paid over the years, see that the range doesn't change all too much
 qplot(year, ratio, data=FINAL, main='Average Tax Rate Paid Across Years', ylab ='Average Tax Rate')
 ```
 
-```{r, include='asis'}
+The next plot was included to show the total income outliers that are very clear in 2013 (top right corner). In future analysis, we will consider dropping these extreme outliers (recent techonology millionaires).
+
+```{r, results='asis' , echo=FALSE}
 # shows the income outliers in 2013; Q: should we drop them?
 qplot(year, total_inc, data=FINAL, main="Total Income by Year Highlighting 2013 Outliers", ylab = 'Total Annual Income')
 ```
 
-```{r, include='asis'}
+The next plot shows the density plot of the average tax rates for all years. It is interesting to note that there is a bimodal distribution. We cannot make any inferences about why this may be the case, because we are not able to observe actual behavoir responses due to data limitations. Moreover, almost all of the observations fall between roughly 25 and 55 percent.
+
+```{r, results='asis', echo=FALSE}
 # plotting the density of the average tax rate
 d <- density(FINAL$ratio) # returns the density data 
 plot(d, main = 'Density Plot of Average Tax Rates') # plots the results
 ```
 
-```{r, message=FALSE, include='asis'}
+The plot below shows the histogram of the total annual income after it has been logged. Before it was lot it was extremely far from normal, now it is a bit closer but still not ideal. However, we are aware that our data suffers from skew because we are focusing only on a specific subsample, namely the ultra wealthy.
+
+```{r, message=FALSE, results='asis', echo=FALSE}
 # hist(FINAL$total_inc, main = '')
 # income looks slightly better after logging it
 hist(FINAL$log_total_inc, main = 'Histogram of Logged Total Income', xlab = 'Log Total Annual Income')
 ```
 
-```{r, message=FALSE, include='asis'}
-# hist(FINAL$taxes_paid, main = '')
-# taxes paid looks slightly better after logging it
-hist(FINAL$log_taxes_paid, main = 'Histogram of Logged Total Taxes', xlab = 'Log Paid Taxes')
-```
+The next figure plots the log total annual income against the average tax rate. Here, in our visual outlook of our data, we are interested in observing patterns between these two key variables. There are clearly multiple instances where higher income individuals have a small average tax rate, which is likely due to potential tax avoidance like for example, shifting income to capital gains. This figure is one in which we would like to develop further for our final project.
 
-```{r, include='asis'}
+```{r, results='asis', echo=FALSE}
 # plotting income against tax rate
 qplot(ratio, log_total_inc, data=FINAL, ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate Against Annual Total Income")
 ```
 
-```{r, include='asis'}
+The following plot is a zoomed in version of the previous plot. It shows the frequency of tax payers who are named above and likely engaging in tax avoidance schemes and resulting with low average tax rates.
+
+
+```{r, results='asis', message=FALSE, echo=FALSE}
 qplot(ratio, log_total_inc, data=FINAL, xlim=c(0,31), ylab  = 'Log Total Annual Income', xlab ='Average Tax Rate', main = "Plot of Average Tax Rate < 31% Against Log Annual Total Incomes")
 ```
 
-```{r, include='asis'}
+The line graph depicts the development of the share of the total income tax revenue paid by the top 0.4 percent, which is our sample. Over the course of five years, the share increase from 5 percent to almost 8 percent. An in each year, we can nicely observe the changes in the top income tax rate changes which likely resulted in the reflected changed in tax revenue collected by the top 0.4 percent.
+
+```{r, results='asis', echo=FALSE}
 sharefigure <- qplot(shares$year, shares$share, caption='Top 0.4% Share of Total Paid Finnish Taxes', ylim=c(0.04, 0.08), geom='line', ylab='Total Finnish Taxes Share Paid by Top 0.4%', xlab='Year')
 sharefigure + theme_bw(base_size = 13)
 ```
@@ -483,20 +511,25 @@ fitted <- with(FINAL,data.frame(log_total_inc))
 fitted$predicted <- predict(logit1, newdata = fitted, type = 'response')
 ```
 
-```{r, include='asis'}
-qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability Individual Would Have an Average Tax Rate Below 30' )
+Our first attempt at running a model is extremely simple. Essentially, we want to see and develop in further analysis a relationship between a given income and the predicted probabilty of paying an average tax rate below certain thresholds. In our first attempt, we ran a logit model with a binary dependent variable (with 1 being observations with a average tax rate below 30). The results are best illustrated by the following figure, a predicted probability plot. The curve of the probabilities is intriguing. The maximum income has the highest probability of paying a tax rate below 30 percent. This is a strong result. Moreover, the curve suggests that lower incomes (within our sample) have a lower probability of paying an adventageous average tax rate. This finding can be seen as motivation for further inspection and analysis.
+
+
+```{r, results='asis', echo=FALSE}
+qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability of Having an Average Tax Rate Below 30' )
 ```
 
+The (simple) "dynamic" regression output below is our failed attempt to run a legitimate and appropriate OLS model including our macro data. Going forward, we hope to find a way to run an model that is able to overcome our initial difficulties. 
 
-```{r, message=FALSE, include='asis'}
+```{r, inlcude=FALSE, echo=FALSE}
 M1 <- lm(share ~ Tax_Rate+ratio+DELTA_Tax_Rate+log(Total_GDP),data = FINAL)
-summary(M1)
+# summary(M1)
 
 # Create cleaner covariate labels
 labels <- c('(Intercept)', 'Top tax rate', 'Change in top tax rate',
             'Log total GDP')
 ```
-```{r, message=FALSE, include='asis'}
+
+```{r, message=FALSE, results='asis', echo=FALSE}
 stargazer::stargazer(M1, covariate.labels = labels,
                      title = 'Inappropriate Model, First Try',
                      type = 'latex', header = FALSE)
@@ -504,14 +537,12 @@ stargazer::stargazer(M1, covariate.labels = labels,
 
 
 # Conclusion: Further Analysis Needed
-After having conducted first descriptive as well as inferential statistics it became quite clear that a better model is needed. Especially the attempt to analyze the top income-tax share dependent on the tax rate by running an ordinary least squares model has failed so far. Obviously controlling for GDP and considering year dummies didn’t lead to the expected outcome: We’re still considering to incorporate other data to build a worthy model. 
-
-
+Our attempt to analyze the top income-tax share dependent on the tax rate by running an ordinary least squares model has failed so far. Obviously controlling for GDP and considering year dummies didn’t lead to the expected outcome: We’re still considering to incorporate other data to build a worthy model. Finally, perhaps our focus should shift to expanding on our simple logit model and incorporating other variables and also tweaking our depending variable looking at different thresholds and also different years.
 
 
 ***
 
-This project used @CiteRStudio to create this research proposal.
+This project used @CiteRStudio to create this assignment.
 
 \pagebreak
 
