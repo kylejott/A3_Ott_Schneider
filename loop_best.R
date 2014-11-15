@@ -153,6 +153,7 @@ tables2009$year <- 2009
 #appending scraped tables
 all <- rbind(tables2009, tables2010, tables2011, tables2012, tables2013)
 
+
 class(all$year)
 
 #changing the titles to english
@@ -294,6 +295,9 @@ Pop09.13 <- Pop09.13[,!(names(Pop09.13) %in% drops)]
 FINAL <- merge(FINAL, Pop09.13,
                by = c('year'))
 
+save(FINAL, file="FINAL_all")
+df2 <- load("FINAL_all")
+
 # Create Year Dummies
 FINAL <- within(FINAL, yr2009<-ifelse(year==2009, 1, 0))
 FINAL <- within(FINAL, yr2010<-ifelse(year==2010, 1, 0))
@@ -322,6 +326,7 @@ shares <- data.frame(year, share)
 FINAL <- merge(FINAL, shares,
                by = c('year'))
 
+save(FINAL, file = "/Users/Kyle/Dropbox/!Fall_2014/Collab_Data/A3_Ott_Schneider/FINAL.RData")
 
 ################
 #Descriptive Statistics
