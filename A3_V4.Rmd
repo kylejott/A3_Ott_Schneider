@@ -380,14 +380,14 @@ sum2_table <- merge(sum2_table, Tax09.13,
 
 #Introduction
 
-The question about an “optimal” income taxation was always discussed against the background of classic economic theories: Income taxation should maximize a given social welfare function, that depicts a societies preference for equality. Furthermore, sacrifice theory of income taxation illustrates that redistribution should take place up to the point where marginal utilities  are equalized. 
+The question about an “optimal” income taxation is always discussed against the background of classic economic theories: Income taxation should maximize a given social welfare function that depicts a societies preference for equality. Furthermore, sacrifice theory of income taxation illustrates that redistribution should take place up to the point where marginal utilities  are equalized. 
 
 However, these theories completely neglect behavioral responses to taxation. According to the Laffer-Curve at one point a further increase of the tax rate would result in a loss in tax revenues due to negative labor supply responses.
-In a very recent work, [@piketty2014inequality] identifies additional reasons, why trends in top-income shares are correlated with the tax rates: Labor responses, evasion/avoidance responses and bargaining responses. 
+In a very recent work, @piketty2014inequality identify additional reasons why trends in top-income shares are correlated with the tax rates: labor responses, evasion/avoidance responses and bargaining responses. 
 
-Whereas poverty is studied extensively in Economics through surveys and welfare programs, the current debate still lacks information about the top of the income distribution. The aim of this project is to inspect exactly this upper end of the income distribution. For this, we’ll analyze micro-level data from finish taxpayers of the years 2009 to 2013. 
+Whereas poverty is studied extensively in economics through surveys and welfare programs, the current debate still lacks information about the top of the income distribution. The aim of this project is to inspect exactly this upper end of the income distribution. For this, we’ll analyze micro-level data from Finish taxpayers of the years 2009 to 2013. 
 
-In Finland the tax on earned income is levied according to a progressive tax scale: Each tax payer has to pay a basic amount dependent on his earned income plus the tax rate within the respective tax bracket. The concrete tax scheme is decided annually by the Parliament. The relevant tax rates in the top tax-bracket were levied as follows: 
+In Finland the tax on earned income is levied according to a progressive tax scale: Each tax payer has to pay a basic amount dependent on his earned income plus the tax rate within the respective tax bracket. The concrete tax scheme is decided annually by the parliament. The relevant tax rates of the top tax-bracket were levied as follows: 
 
 * 2009: 30.5%
 * 2010: 30.0%
@@ -395,23 +395,23 @@ In Finland the tax on earned income is levied according to a progressive tax sca
 * 2012: 29.75%
 * 2013: 31.75%
 
-Against this background, our paper’s purpose is to identify anomalies in the tax patterns of ultra-wealthy finish people. 
-In a first step, we will visualize how the share of the top 0.4% (wealthiest 15.000 individuals) in total income-tax revenue changes between 2009 and 2013. Following up, with inferential statistics we try to dig deeper into income-tax payer’s behavior: What is the predicted probability to pay a certain average tax rate given your income? What was the potential impact of changes in top tax-rates on ultra-wealthy finish people?
+Against this background, our paper’s purpose is to identify anomalies in the tax patterns of ultra-wealthy Finish people. 
+In a first step, we will visualize how the share of the top 0.4% (wealthiest 15.000 individuals) in total income-tax revenue changes between 2009 and 2013. Following up, with inferential statistics we try to dig deeper into income-tax payer’s behavior: What is the predicted probability to pay a certain average tax rate given your income? What was the potential impact of changes in top tax-rates on ultra-wealthy Finish people?
 Conditional on the first results, more precise models, as well as a suitable strategy to tackle the raised questions will be assessed. 
 
 # Our Unique, Tidy, Open, Reproducible Dataset
-The Nordic countries Finland, Sweden and Norway have a tradition of publishing everyone’s income and tax details every year. Whereas in Sweden and Norway this data is only accessible being a citizen and after pulling an official request, in Finland top income tax earners are public figures as a result of heightened media scrutiny on top income tax earners. Finland’s largest business online daily newspaper “Taloussanomat“ published the figures in a suitable format for our purpose: The top 15.000 income earners are displayed on yearly basis from 2009 to 2013, including their total income, taxed paid and average tax rate. 
+The Nordic countries of Finland, Sweden and Norway have a tradition of publishing everyone’s income and tax details every year. Whereas in Sweden and Norway this data is only accessible to citizens and after pulling an official request, in Finland top income tax earners are public figures as a result of heightened media scrutiny on top income tax earners. Finland’s largest business online daily newspaper *Taloussanomat* published the figures in a suitable format for our purpose: The top 15,000 income earners are displayed on yearly basis from 2009 to 2013, including their name, total income (income, profits, and capital gains), taxed paid and average tax rate. 
 
-In a first step we scraped the data from their homepage. Given that each year’s data was partitioned into 30 tables of 500 observations each, we wrote a loop in order to gather the date in one data frame. We ran that loop for each year and appended them into the same data frame. Moreover, we converted the strings with weird characters and various lengths into numeric class. Since there are some observations missing in the first three years (2009 to 2011), the final data set contains 70.402 observations.
+In a first step we scraped the data from their homepage. Given that each year’s data was partitioned into 30 tables of 500 observations each, we wrote a loop in order to gather the date in one data frame. We ran that loop for each year and appended them into the same data frame. Moreover, we converted the strings with weird characters and various lengths into numeric class. Since there are some observations missing in the first three years (2009 to 2011), the final data set contains 70,402 observations.
 
 Afterwards, we merged that data frame with two tables from the OECD: One indicating the total Finnish income-tax revenues from 2009 to 2013 and one indicating the number of working population. In addition to that, we manually amended the total GDP in constant prices (national base year) as well as the respective top-tax rates for each year. 
 
-Based on this data, we created a couple of new variables that are helpful for our analysis: The rank based on the income of each individual in every year; the change in the tax rate compared to the previous year and the share of total income-revenues that the top 15.000 tax payers pay.
+Based on this data, we created a couple of new variables that are helpful for our analysis: The rank based on the income of each individual in every year; the change in the tax rate compared to the previous year and the share of total income-revenues that the top 15,000 tax payers pay.
 
 Before we continue to the descriptive analysis, just one note on the origins of our various data. First, as already mentioned, all of the micro-level income data comes from taloussanomat, the income tax revenue for 2013 comes from @incometaxrev2013, the income tax revenue for 2009-2012 comes from @oecdstatsinctax0912, the population data comes from @oecdstatspopulation, the income tax scheme for 2013 comes from @nordisketax, the income tax scheme for 2012 comes from @kpmg, the income tax scheme for 2011 comes from @wikipediaTax, our income tax scheme for 2010 comes from @crowe2010worldwide, and the income tax scheme for 2009 comes from @tax2009finland.
 
 # Descriptive Statistics of Our Data
-In the table below, you will see the breakdown of the data by: year, number of observation ("n"), total working population in Finland in given year, share in working population presented by top 15,000 income earners, total tax revenues collected (in Euros), total GDP (in constant prices national base year), top income tax rate, and the change of this tax rate by year.
+In the table below, you will see the breakdown of the data by: year, number of observations ("n"), total working population in Finland in given year, share in working population presented by top 15,000 income earners, total tax revenues collected (in Euros), total GDP (in constant prices national base year), top income tax rate, and the change of this tax rate by year.
 
 
 ```{r, results='asis', echo=FALSE}
@@ -457,14 +457,14 @@ The figure below shows the range of average tax rates paid each year across all 
 qplot(year, ratio, data=FINAL, main='Average Tax Rate Paid Across Years', ylab ='Average Tax Rate')
 ```
 
-The next plot was included to show the total income outliers that are very clear in 2013 (top right corner). In future analysis, we will consider dropping these extreme outliers (recent techonology millionaires).
+The next plot was included to show the total income outliers that are very clear in 2013 (top right corner). In future analysis, we will consider dropping these extreme outliers (recent technology millionaires).
 
 ```{r, results='asis' , echo=FALSE}
 # shows the income outliers in 2013; Q: should we drop them?
 qplot(year, total_inc, data=FINAL, main="Total Income by Year Highlighting 2013 Outliers", ylab = 'Total Annual Income')
 ```
 
-The next plot shows the density plot of the average tax rates for all years. It is interesting to note that there is a bimodal distribution. We cannot make any inferences about why this may be the case, because we are not able to observe actual behavoir responses due to data limitations. Moreover, almost all of the observations fall between roughly 25 and 55 percent.
+The next plot shows the density plot of the average tax rates for all years. It is interesting to note that there is a bimodal distribution. We cannot make any inferences about why this may be the case, because we are not able to observe actual behavior responses due to data limitations. Moreover, almost all of the observations fall between roughly 25 and 55 percent.
 
 ```{r, results='asis', echo=FALSE}
 # plotting the density of the average tax rate
@@ -511,11 +511,11 @@ fitted <- with(FINAL,data.frame(log_total_inc))
 fitted$predicted <- predict(logit1, newdata = fitted, type = 'response')
 ```
 
-Our first attempt at running a model is extremely simple. Essentially, we want to see and develop in further analysis a relationship between a given income and the predicted probabilty of paying an average tax rate below certain thresholds. In our first attempt, we ran a logit model with a binary dependent variable (with 1 being observations with a average tax rate below 30). The results are best illustrated by the following figure, a predicted probability plot. The curve of the probabilities is intriguing. The maximum income has the highest probability of paying a tax rate below 30 percent. This is a strong result. Moreover, the curve suggests that lower incomes (within our sample) have a lower probability of paying an adventageous average tax rate. This finding can be seen as motivation for further inspection and analysis.
+Our first attempt at running a model is an extremely simple approach. Essentially, we want to see and develop in further analysis a relationship between a given income and the predicted probability of paying an average tax rate below certain thresholds. In our first attempt, we ran a logit model with a binary dependent variable (with 1 being observations with a average tax rate below 30%). The results are best illustrated by the following figure, a predicted probability plot. The curve of the probabilities is intriguing. The maximum income has the highest probability of paying a tax rate below 30 percent. This is a strong result. Moreover, the curve suggests that lower incomes (within our sample) have a lower probability of paying an advantageous average tax rate. This finding can be seen as motivation for further inspection and analysis.
 
 
 ```{r, results='asis', echo=FALSE}
-qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability of Having an Average Tax Rate Below 30' )
+qplot(fitted$predicted, log_total_inc, data = FINAL, xlab = 'Predicted Probability', ylab = 'Log Total Income', main='Predicted Probability of Having an Average Tax Rate Below 30%' )
 ```
 
 The (simple) "dynamic" regression output below is our failed attempt to run a legitimate and appropriate OLS model including our macro data. Going forward, we hope to find a way to run an model that is able to overcome our initial difficulties. 
